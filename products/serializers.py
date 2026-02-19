@@ -12,6 +12,7 @@ class ProductImageModelSerializer(serializers.ModelSerializer):
         fields = ['id', 'url']
 
 class ProductModelSerializer(serializers.ModelSerializer):
+    product_type = ProductTypeModelSerializer(read_only=True)
     images = ProductImageModelSerializer(read_only=True, many=True)
 
     class Meta:
