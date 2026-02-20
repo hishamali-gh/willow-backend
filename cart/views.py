@@ -3,14 +3,17 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import Cart, CartItem
-from .serializers import CartModelSerializer, AddToCartModelSerializer
+from .serializers import CartItemModelSerializer, AddToCartModelSerializer
 
 class CartAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         cart, created = Cart.objects.get_or_create(user=request.user)
-        serializer = CartModelSerializer(cart)
+
+        cart_items = CartItem.objects.filter(cart=cart)
+
+        serializer = CartItemModelSerializer(cart_items, many=True)
 
         return Response(serializer.data)
     

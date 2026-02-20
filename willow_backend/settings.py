@@ -34,7 +34,8 @@ INSTALLED_APPS = [
     'accounts',
     'products',
     'cart',
-    'wishlist'
+    'wishlist',
+    'orders'
 ]
 
 MIDDLEWARE = [
@@ -141,7 +142,7 @@ AUTH_USER_MODEL = 'accounts.User'
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=10),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=60),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
