@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ProductType, ProductImage, Product
+from .models import ProductType, ProductImage, Product, ProductVariant
 
 class ProductTypeModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,3 +30,16 @@ class ProductModelSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         ]
+
+class ProductVariantModelSerializer(serializers.ModelSerializer):
+    product_id = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        source='product',
+        write_only=True
+    )
+
+    product = ProductModelSerializer(read_only=True)
+
+    class Meta:
+        model = ProductVariant
+        fields = ['id', 'product', 'product_id', 'size', 'stock']

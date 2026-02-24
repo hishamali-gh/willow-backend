@@ -7,9 +7,8 @@ User = get_user_model()
 class Order(models.Model):
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),
-        ('PAID', 'Paid'),
-        ('SHIPPING', 'Shipping'),
-        ('DELIVERING', 'Delivering'),
+        ('OTW', 'OTW'),
+        ('DELIVERED', 'Delivered'),
         ('CANCELLED', 'Cancelled')
     ]
 
