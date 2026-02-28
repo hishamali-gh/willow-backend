@@ -94,14 +94,24 @@ class ProductAPIView(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def post(self, request):
+    """ def post(self, request):
         serializer = ProductModelSerializer(data=request.data)
 
         serializer.is_valid(raise_exception=True)
 
         serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED) """
+    
+    def post(self, request):
+        serializer = ProductModelSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        print(serializer.errors)   # <-- add this
+        return Response(serializer.errors, status=400)
     
     def put(self, request, pk=None):
         product = get_object_or_404(Product, pk=pk)
@@ -186,10 +196,10 @@ class ProductVariantAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class ProductImageAPIView(APIView):
+
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
-        
         return [IsAuthenticated(), IsAdminUser()]
 
     def get(self, request, product_id=None, image_id=None):
@@ -198,49 +208,45 @@ class ProductImageAPIView(APIView):
                 {'error': 'Product ID is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        product = get_object_or_404(Product, pk=product_id)
-        
-        if image_id:
-            image = get_object_or_404(product.images, pk=image_id)
-            serializer = ProductImageModelSerializer(image)
 
+        product = get_object_or_404(Product, pk=product_id)
+
+        if image_id:
+            image = get_object_or_404(product.images.all(), pk=image_id)
+            serializer = ProductImageModelSerializer(image)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         images = product.images.all()
         serializer = ProductImageModelSerializer(images, many=True)
-
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def post(self, request, product_id=None):
         if not product_id:
             return Response(
                 {'error': 'Product ID is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         product = get_object_or_404(Product, pk=product_id)
         serializer = ProductImageModelSerializer(data=request.data)
 
         serializer.is_valid(raise_exception=True)
-
         serializer.save(product=product)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+
     def put(self, request, product_id=None, image_id=None):
         if not image_id or not product_id:
             return Response(
                 {'error': 'Both the Product ID and the Image ID are required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         product = get_object_or_404(Product, pk=product_id)
-        image = get_object_or_404(product.images, pk=image_id)
+        image = get_object_or_404(product.images.all(), pk=image_id)
+
         serializer = ProductImageModelSerializer(image, data=request.data)
-
         serializer.is_valid(raise_exception=True)
-
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -251,13 +257,12 @@ class ProductImageAPIView(APIView):
                 {'error': 'Both the Product ID and the Image ID are required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         product = get_object_or_404(Product, pk=product_id)
-        image = get_object_or_404(product.images, pk=image_id)
+        image = get_object_or_404(product.images.all(), pk=image_id)
+
         serializer = ProductImageModelSerializer(image, data=request.data, partial=True)
-
         serializer.is_valid(raise_exception=True)
-
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -268,10 +273,9 @@ class ProductImageAPIView(APIView):
                 {'error': 'Both the Product ID and the Image ID are required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        product = get_object_or_404(Product, pk=product_id)
-        image = get_object_or_404(product.images, pk=image_id)
-        
-        image.delete()
 
+        product = get_object_or_404(Product, pk=product_id)
+        image = get_object_or_404(product.images.all(), pk=image_id)
+
+        image.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

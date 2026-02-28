@@ -1,37 +1,48 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, **extra_fields):
-        if not username:
-            raise ValueError('Username is required')
+        name = extra_fields.get('name')
 
-        if not email:
-            raise ValueError('Email is required')
+        if not name or not name.strip():
+            raise ValidationError('*Name is required')
 
-        username = username.strip().lower()
+        if not username or not username.strip():
+            raise ValidationError('*Username is required')
+
+        if not email or not email.strip():
+            raise ValidationError('*Email is required')
+        
+        extra_fields['name'] = name.strip()
+        username = username.strip()
         email = self.normalize_email(email)
 
         user = self.model(username=username, email=email, **extra_fields)
 
         if password:
             user.set_password(password)
+
         else:
             user.set_unusable_password()
 
         user.save(using=self._db)
-        
+
         return user
 
     def create_superuser(self, username, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
+        if not password:
+            raise ValidationError('*Superuser must have a password')
+
         if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True')
+            raise ValidationError('Superuser must have is_staff=True')
 
         if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True')
+            raise ValidationError('Superuser must have is_superuser=True')
 
         return self.create_user(username, email, password, **extra_fields)
 

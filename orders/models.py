@@ -12,14 +12,14 @@ class Order(models.Model):
         ('CANCELLED', 'Cancelled')
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    name = models.CharField(max_length=255, default=user.name)
+    name = models.CharField(max_length=255)
     address = models.TextField(default='Thamarassery')
     city = models.CharField(max_length=100, default='Kozhikode')
-    postal_code = models.CharField(max_length=20, default=None)
-    phone = models.CharField(max_length=20, default=None)
+    postal_code = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)

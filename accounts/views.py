@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from .serializers import RegistrationModelSerializer, LoginSerializer
+from .serializers import RegistrationModelSerializer, LoginSerializer, MeModelSerializer, UserModelSerializer
 
 User = get_user_model()
 
@@ -75,18 +75,18 @@ class UserAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             user = get_object_or_404(User, pk=pk)
-            serializer = RegistrationModelSerializer(user)
+            serializer = UserModelSerializer(user)
 
             return Response(serializer.data)
         
         users = User.objects.all()
-        serializer = RegistrationModelSerializer(users, many=True)
+        serializer = UserModelSerializer(users, many=True)
 
         return Response(serializer.data)
     
     def put(self, request, pk=None):
         user = get_object_or_404(User, pk=pk)
-        serializer = RegistrationModelSerializer(user, data=request.data)
+        serializer = UserModelSerializer(user, data=request.data)
 
         serializer.is_valid(raise_exception=True)
 
@@ -96,7 +96,7 @@ class UserAPIView(APIView):
     
     def patch(self, request, pk=None):
         user = get_object_or_404(User, pk=pk)
-        serializer = RegistrationModelSerializer(user, data=request.data, partial=True)
+        serializer = UserModelSerializer(user, data=request.data, partial=True)
 
         serializer.is_valid(raise_exception=True)
 
@@ -115,6 +115,6 @@ class MeAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = RegistrationModelSerializer(request.user)
+        serializer = MeModelSerializer(request.user)
 
         return Response(serializer.data)
