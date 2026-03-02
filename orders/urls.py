@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import CreateOrderView, OrderListView
+from .views import CreateOrderView, OrderListView, AdminOrderAPIView
 
 urlpatterns = [
-    path('create-order/', CreateOrderView.as_view()),
-    path('my-orders/', OrderListView.as_view()),
+    path('', OrderListView.as_view(), name='order-list'),
+    path('create-order/', CreateOrderView.as_view(), name='create-order'),
+    path('<int:pk>/', AdminOrderAPIView.as_view(), name='order-detail'),
 ]

@@ -1,12 +1,12 @@
 from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.db import transaction
 from rest_framework.generics import ListAPIView
 from .serializers import OrderSerializer
 from .models import Order, OrderItem
 from cart.models import Cart
-
 
 class CreateOrderView(APIView):
     permission_classes = [IsAuthenticated]
@@ -51,10 +51,17 @@ class CreateOrderView(APIView):
         cart_items.delete()
 
         return Response({"detail": "Order created successfully"})
-    
-class OrderListView(ListAPIView):
+
+class AdminOrderAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAdminUser]
+
+class OrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if self.request.user.is_staff:
+            return Order.objects.all().order_by('-created_at')
         return Order.objects.filter(user=self.request.user).order_by('-created_at')

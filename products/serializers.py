@@ -17,6 +17,8 @@ class ProductModelSerializer(serializers.ModelSerializer):
     main_image = serializers.SerializerMethodField()
     image = serializers.URLField(write_only=True, required=False)
 
+    images = ProductImageModelSerializer(many=True, read_only=True)
+
     class Meta:
         model = Product
         fields = [
@@ -27,6 +29,7 @@ class ProductModelSerializer(serializers.ModelSerializer):
             'description',
             'price',
             'main_image',
+            'images',
             'image',
             'is_active',
             'created_at',
@@ -65,13 +68,16 @@ class ProductModelSerializer(serializers.ModelSerializer):
             product_type, _ = ProductType.objects.get_or_create(name=type_name)
             instance.product_type = product_type
 
-        instance = super().update(instance, validated_data)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
 
         if image_url:
-            ProductImage.objects.update_or_create(
+            ProductImage.objects.create(
                 product=instance,
-                main=True,
-                defaults={'url': image_url}
+                url=image_url,
+                main=False
             )
 
         return instance
